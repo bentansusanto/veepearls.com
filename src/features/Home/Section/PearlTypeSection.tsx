@@ -1,10 +1,10 @@
-import { JewelType } from "@/common/Fetching/Product/fetch-jewel";
+import { useGetJewelTypesQuery } from "@/store/services/product.service";
 import { pearlTypes } from "@/lib/pearl-types";
 import Image from "next/image";
 import React from "react";
 
 const PearlTypeSection = () => {
-  const { data: jeweltype } = JewelType();
+  const { data: jeweltype } = useGetJewelTypesQuery();
   const pearlTypeData = jeweltype?.map((item: any) => {
     const matchingType = pearlTypes.find(
       (type) => type.name.toLowerCase() === item.name_type.toLowerCase(),

@@ -17,7 +17,7 @@ import {
   // CarouselNext,
   // CarouselPrevious,
 } from "@/components/ui/carousel";
-import { CreateCart } from "@/common/Fetching/Cart/fetch-cart";
+import { useAddCartMutation } from "@/store/services/cart.service";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -31,7 +31,7 @@ const ListProductJewelType: React.FC<Props> = ({ products }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [quantity, setQuantity] = useState<number>(1);
   const [isAddCart, setIsAddCart] = useState<boolean>(false);
-  const addCart = CreateCart();
+  const [addCart] = useAddCartMutation();
   const router = useRouter();
   const [selectProduct, setSelectProduct] = useState<any>(null);
   const handleSelect = (id: string) => {
@@ -52,20 +52,17 @@ const ListProductJewelType: React.FC<Props> = ({ products }) => {
   const handleAddToCart = () => {
     if (!selectProduct) return;
 
-    addCart.mutate(
-      { productId: selectProduct.id, quantity },
-      {
-        onSuccess: () => {
-          setIsAddCart(true);
-          setQuantity(1);
-          setTimeout(() => setIsAddCart(false), 3000); // sembunyikan dot setelah 3 detik (opsional)
-        },
-        onError: (error) => {
-          router.push("/login");
-          console.error("Error adding to cart:", error);
-        },
-      },
-    );
+    addCart({ productId: selectProduct.id, quantity })
+      .unwrap()
+      .then(() => {
+        setIsAddCart(true);
+        setQuantity(1);
+        setTimeout(() => setIsAddCart(false), 3000);
+      })
+      .catch((error) => {
+        router.push("/login");
+        console.error("Error adding to cart:", error);
+      });
   };
 
   return (

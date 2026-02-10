@@ -2,22 +2,26 @@
 import React, { ReactNode, useEffect } from 'react'
 import Header from './Header'
 import Footer from './Footer'
-import { RefreshToken } from '@/common/Fetching/Auth/Auth'
+import { useRefreshTokenMutation } from '@/store/services/auth.service'
 
-const MainLayout = ({children}:{children:ReactNode}) => {
-  const {refreshTokenMutation} = RefreshToken()
+const MainLayout = ({ children }: { children: ReactNode }) => {
+  const [refreshToken] = useRefreshTokenMutation()
+
   useEffect(() => {
     const interval = setInterval(() => {
-      refreshTokenMutation.mutate();
-    }, 60 * 60 * 1000); // Refresh every minute
+      refreshToken()
+        .unwrap()
+        .catch(() => {})
+    }, 60 * 60 * 1000)
 
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, [refreshTokenMutation]);
+    return () => clearInterval(interval)
+  }, [refreshToken])
+
   return (
-    <div className='mx-auto lg:max-w-md bg-gray-100 dark:bg-transparent h-full'>
-        <Header/>
-        <main>{children}</main>
-        <Footer/>
+    <div className="mx-auto lg:max-w-md bg-gray-100 dark:bg-transparent h-full">
+      <Header />
+      <main>{children}</main>
+      <Footer />
     </div>
   )
 }

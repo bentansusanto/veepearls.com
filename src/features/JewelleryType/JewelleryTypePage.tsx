@@ -1,16 +1,15 @@
 'use client'
-import { JewelType } from '@/common/Fetching/Product/fetch-jewel'
-import { GetAllProducts } from '@/common/Fetching/Product/fetch-product'
 import { heading } from '@/components/ui/font-family'
+import { useGetJewelTypesQuery, useGetProductsQuery } from '@/store/services/product.service'
 import { useParams } from 'next/navigation'
 import ListProductJewelType from './ListProductType'
 
 const JewelleryTypePage = () => {
   const params = useParams()
   const type = params?.type
-  const { data: products } = GetAllProducts()
-  const listProduct = products?.filter((product: any) => product.jeweltype?.type === type)
-  const { data: jeweltype } = JewelType()
+  const { data: products } = useGetProductsQuery()
+  const listProduct = (products || [])?.filter((product: any) => product.jeweltype?.type === type)
+  const { data: jeweltype } = useGetJewelTypesQuery()
   const typeData = jeweltype?.find((item: any) => item.type === type)
   return (
     <div className="mt-5 mb-20">

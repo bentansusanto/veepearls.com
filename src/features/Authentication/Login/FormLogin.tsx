@@ -1,5 +1,5 @@
 "use client";
-import { LoginUser } from "@/common/Fetching/Auth/Auth";
+import { useLoginMutation } from "@/store/services/auth.service";
 import {
   InitialLoginValue,
   validationLoginSchema,
@@ -21,14 +21,14 @@ import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 
 const FormLogin = () => {
-  const { mutateAsync: loginMutation, error, isSuccess } = LoginUser();
+  const [login, { error, isSuccess }] = useLoginMutation();
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const router = useRouter();
   const formik = useFormik({
     initialValues: InitialLoginValue,
     validationSchema: validationLoginSchema,
     onSubmit: async (values, { resetForm }) => {
-      await loginMutation(values);
+      await login(values);
       resetForm();
       setOpenSuccess(true);
       setTimeout(() => {

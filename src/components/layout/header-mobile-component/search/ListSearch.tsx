@@ -1,13 +1,12 @@
-import { JewelType } from "@/common/Fetching/Product/fetch-jewel";
-import { GetAllProducts } from "@/common/Fetching/Product/fetch-product";
+import { useGetJewelTypesQuery, useGetProductsQuery } from "@/store/services/product.service";
 import { X } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 const ListSearch = () => {
-    const {data: products} = GetAllProducts();
-    const {data: jeweltype} = JewelType();
+    const {data: products} = useGetProductsQuery();
+    const {data: jeweltype} = useGetJewelTypesQuery();
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
     const [filteredTypes, setFilteredTypes] = useState<any[]>([]);

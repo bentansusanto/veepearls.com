@@ -13,7 +13,7 @@ import {
 } from "@/common/validation/AuthValidation";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
-import { VerifyAccount } from "@/common/Fetching/Auth/Auth";
+import { useVerifyAccountMutation } from "@/store/services/auth.service";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
@@ -28,14 +28,14 @@ import {
 import { Check } from "lucide-react";
 
 const FormVerifyAccount = () => {
-  const { verifyMutation, error, success } = VerifyAccount();
+  const [verifyAccount, { error, isSuccess }] = useVerifyAccountMutation();
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const router = useRouter();
   const formik = useFormik({
     initialValues: initialVerifyAccountValue,
     validationSchema: validationVerifyAccountSchema,
     onSubmit: async (values, { resetForm }) => {
-      await verifyMutation.mutateAsync(values);
+      await verifyAccount(values);
       resetForm();
       setOpenSuccess(true);
       setTimeout(() => {
@@ -82,7 +82,7 @@ const FormVerifyAccount = () => {
             {formik.isSubmitting ? "Loading..." : "Verify Account"}
           </Button>
           <AlertDialogContent>
-            {success && (
+            {isSuccess && (
               <AlertDialogHeader>
                 <span className="w-20 h-20 p-3 rounded-full mx-auto mb-5 flex justify-center animate-pulse bg-green-200">
                   <span className="w-14 h-14 p-2.5 rounded-full flex mx-auto justify-center bg-green-400 text-white">

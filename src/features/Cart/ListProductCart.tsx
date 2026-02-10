@@ -1,21 +1,15 @@
 'use client'
 import { dollar } from "@/common/Currency";
-import {
-  GetAllCart,
-  RemoveCart,
-  UpdateCart,
-} from "@/common/Fetching/Cart/fetch-cart";
 import { Button } from "@/components/ui/button";
-import { useQueryClient } from "@tanstack/react-query";
+import { useGetCartQuery, useRemoveCartMutation, useUpdateCartMutation } from "@/store/services/cart.service";
 import { Minus, Plus, X } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 
 const ListProductCart = () => {
-  const { data: cartData} = GetAllCart();
-  const { mutate: updateCart } = UpdateCart(); 
-  const { mutate: removeCart } = RemoveCart(); 
-  const queryClient = useQueryClient();
+  const { data: cartData } = useGetCartQuery();
+  const [updateCart] = useUpdateCartMutation();
+  const [removeCart] = useRemoveCartMutation();
 
   // const [cartItems, setCartItems] = useState<any[]>([]);
   const [localQuantities, setLocalQuantities] = useState<{ [key: string]: number }>({});
@@ -42,12 +36,9 @@ const ListProductCart = () => {
     <div className="space-y-5 mx-5">
       {cartData?.map((item:any, idx:any) => {
         const handleRemove = () => {
-          removeCart(item.id, {
-            onSuccess: () => {
-              queryClient.removeQueries({ queryKey: ["cart"] });
-              // window.location.reload();
-            },
-          });
+          removeCart(String(item.id))
+            .unwrap()
+            .catch(() => {})
         };
 
         const handleIncrease = () => {
@@ -57,15 +48,12 @@ const ListProductCart = () => {
           setLocalQuantities((prev) => ({ ...prev, [item.id]: newQuantity }));
           setLocalTotalPrices((prev) => ({ ...prev, [item.id]: newTotalPrice }));
 
-          updateCart(
-            { cartId: item.id, quantity: newQuantity },
-            {
-              onError: () => {
-                setLocalQuantities((prev) => ({ ...prev, [item.id]: item.quantity }));
-                setLocalTotalPrices((prev) => ({ ...prev, [item.id]: item.total_price }));
-              },
-            }
-          );
+          updateCart({ cartId: String(item.id), quantity: newQuantity })
+            .unwrap()
+            .catch(() => {
+              setLocalQuantities((prev) => ({ ...prev, [item.id]: item.quantity }));
+              setLocalTotalPrices((prev) => ({ ...prev, [item.id]: item.total_price }));
+            });
         };
 
         const handleDecrease = () => {
@@ -77,15 +65,12 @@ const ListProductCart = () => {
             setLocalQuantities((prev) => ({ ...prev, [item.id]: newQuantity }));
             setLocalTotalPrices((prev) => ({ ...prev, [item.id]: newTotalPrice }));
 
-            updateCart(
-              { cartId: item.id, quantity: newQuantity },
-              {
-                onError: () => {
-                  setLocalQuantities((prev) => ({ ...prev, [item.id]: item.quantity }));
-                  setLocalTotalPrices((prev) => ({ ...prev, [item.id]: item.total_price }));
-                },
-              }
-            );
+            updateCart({ cartId: String(item.id), quantity: newQuantity })
+              .unwrap()
+              .catch(() => {
+                setLocalQuantities((prev) => ({ ...prev, [item.id]: item.quantity }));
+                setLocalTotalPrices((prev) => ({ ...prev, [item.id]: item.total_price }));
+              });
           }
         };
 

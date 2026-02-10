@@ -19,7 +19,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
-import { VerifyOtp } from "@/common/Fetching/Auth/Auth";
+import { useVerifyOtpMutation } from "@/store/services/auth.service";
 import {
   initialVerifyOtpValue,
   validationVerifyOtpSchema,
@@ -29,13 +29,13 @@ import { Check } from "lucide-react";
 
 const FormVerifyOtp = () => {
   const [openSuccess, setOpenSuccess] = React.useState(false);
-  const { verifyOtpMutation, error, success } = VerifyOtp();
+  const [verifyOtp, { error, isSuccess }] = useVerifyOtpMutation();
   const router = useRouter();
   const formik = useFormik({
     initialValues: initialVerifyOtpValue,
     validationSchema: validationVerifyOtpSchema,
     onSubmit: async (values, { resetForm }) => {
-      await verifyOtpMutation.mutateAsync(values);
+      await verifyOtp(values);
       resetForm();
       setOpenSuccess(true);
       setTimeout(() => {
@@ -70,7 +70,7 @@ const FormVerifyOtp = () => {
             {formik.isSubmitting ? "Loading..." : "Verify Otp"}
           </Button>
           <AlertDialogContent>
-            {success && (
+            {isSuccess && (
               <AlertDialogHeader>
                 <span className="w-20 h-20 p-3 rounded-full mx-auto mb-5 flex justify-center animate-pulse bg-green-200">
                   <span className="w-14 h-14 p-2.5 rounded-full flex mx-auto justify-center bg-green-400 text-white">

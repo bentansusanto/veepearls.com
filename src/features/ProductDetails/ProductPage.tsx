@@ -1,7 +1,7 @@
 "use client";
 import { dollar } from "@/common/Currency";
-import { CreateCart } from "@/common/Fetching/Cart/fetch-cart";
-import { GetAllProducts } from "@/common/Fetching/Product/fetch-product";
+import { useAddCartMutation } from "@/store/services/cart.service";
+import { useGetProductsQuery } from "@/store/services/product.service";
 import { Button } from "@/components/ui/button";
 import {
   Carousel,
@@ -16,13 +16,13 @@ import { useState } from "react";
 const ProductDetailPage = () => {
   const params = useParams();
   const slug = params?.slug;
-  const { data: products } = GetAllProducts();
+  const { data: products } = useGetProductsQuery();
   const productDetail = products?.filter(
     (product: any) => product.slug === slug
   );
   const [quantity, setQuantity] = useState<number>(1);
   const [isAddCart, setIsAddCart] = useState<boolean>(false);
-  const addCart = CreateCart();
+  const [addCart] = useAddCartMutation();
   const router = useRouter();
 
   const handleIncrement = () => {
@@ -36,20 +36,17 @@ const ProductDetailPage = () => {
   const handleAddToCart = () => {
     if (!productDetail?.[0]?.id) return;
 
-    addCart.mutate(
-      { productId: productDetail?.[0]?.id, quantity },
-      {
-        onSuccess: () => {
-          setIsAddCart(true);
-          setQuantity(1);
-          setTimeout(() => setIsAddCart(false), 3000); // sembunyikan dot setelah 3 detik (opsional)
-        },
-        onError: (error) => {
-          router.push("/login");
-          console.error("Error adding to cart:", error);
-        },
-      }
-    );
+    addCart({ productId: productDetail?.[0]?.id, quantity })
+      .unwrap()
+      .then(() => {
+        setIsAddCart(true);
+        setQuantity(1);
+        setTimeout(() => setIsAddCart(false), 3000);
+      })
+      .catch((error) => {
+        router.push("/login");
+        console.error("Error adding to cart:", error);
+      });
   };
   return (
     <div className="px-5 mt-5 mb-10">
@@ -120,4 +117,3 @@ const ProductDetailPage = () => {
 };
 
 export default ProductDetailPage;
-

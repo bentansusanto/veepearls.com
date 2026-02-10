@@ -1,7 +1,4 @@
 'use client'
-import { GetUser, Logout } from '@/common/Fetching/Auth/Auth'
-import { GetAllCart } from '@/common/Fetching/Cart/fetch-cart'
-import { JewelType } from '@/common/Fetching/Product/fetch-jewel'
 import { Mobile } from '@/common/media-query'
 import { useScrollPosition } from '@/common/use-scroll-mobile-menu'
 import {
@@ -22,6 +19,10 @@ import {
 } from '@/components/ui/drawer'
 import ListProductCart from '@/features/Cart/ListProductCart'
 import { menuLeftMobile, menuNavigation, socialMedia } from '@/lib/nav-data'
+import { useGetUserQuery, useLogoutMutation } from '@/store/services/auth.service'
+import { useGetCartQuery } from '@/store/services/cart.service'
+import { useGetJewelTypesQuery } from '@/store/services/product.service'
+import Cookies from 'js-cookie'
 import {
   ChevronDown,
   ChevronLeft,
@@ -45,10 +46,10 @@ import ListSearch from './header-mobile-component/search/ListSearch'
 const Header = () => {
   const { isMobile } = Mobile()
   const { scrollY } = useScrollPosition()
-  const { data: userData } = GetUser()
-  const { data: jewelData } = JewelType()
-  const { data: cartData } = GetAllCart()
-  const { logout } = Logout()
+  const { data: userData } = useGetUserQuery()
+  const { data: jewelData } = useGetJewelTypesQuery()
+  const { data: cartData } = useGetCartQuery()
+  const [logoutMutation] = useLogoutMutation()
   const [openMenu, setOpenMenu] = useState<boolean>(false)
   const [selectMenu, setSelectMenu] = useState<number | null>(0)
   const handleSelectMenu = (index: number) => {
@@ -56,6 +57,16 @@ const Header = () => {
   }
   const handleOpenMenu = () => {
     setOpenMenu(!openMenu)
+  }
+
+  const handleLogout = () => {
+    logoutMutation()
+      .unwrap()
+      .catch(() => {})
+      .finally(() => {
+        Cookies.remove('session_veepearl')
+        window.location.href = '/login'
+      })
   }
 
   return (
@@ -108,7 +119,7 @@ const Header = () => {
                       <Drawer>
                         <DrawerTrigger className="relative">
                           <ShoppingBag width={20} height={20} strokeWidth={1.5} />
-                          {cartData?.length > 0 && (
+                          {Array.isArray(cartData) && cartData.length > 0 && (
                             <span className="bg-red-500 w-3 h-3 animate-pulse p-0.5 text-white absolute top-0 right-0 flex justify-center mx-auto rounded-full text-xs" />
                           )}
                         </DrawerTrigger>
@@ -211,7 +222,7 @@ const Header = () => {
                 <div className="flex items-center justify-between">
                   {userData ? (
                     <span
-                      onClick={logout}
+                      onClick={handleLogout}
                       className="flex cursor-pointer items-center space-x-5 text-sm text-red-500"
                     >
                       <LogOut width={16} height={16} strokeWidth={1.75} className="me-2" />
@@ -314,7 +325,7 @@ const Header = () => {
                     <ShoppingBag width={20} height={20} strokeWidth={1.5} />
                     <span className="text-[10px] mt-1">Cart</span>
                   </div>
-                  {cartData?.length > 0 ? (
+                  {Array.isArray(cartData) && cartData.length > 0 ? (
                     <span className="bg-red-500 w-3 h-3 animate-pulse p-0.5 text-white absolute top-0 right-0 flex justify-center mx-auto rounded-full text-xs" />
                   ) : null}
                 </DrawerTrigger>

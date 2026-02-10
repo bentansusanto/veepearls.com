@@ -1,6 +1,5 @@
-import ReactQueryProvider from '@/common/ReactQuerySetup'
+import RootProviders from '@/components/RootProviders'
 import { body } from '@/components/ui/font-family'
-import { ThemeProvider } from '@/components/ui/theme-provider'
 import './globals.css'
 import MaintenancePage from './maintenance/page'
 
@@ -13,7 +12,7 @@ export default function RootLayout({
 
   if (isMaintenanceMode) {
     return (
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body className={body.className}>
           <MaintenancePage />
         </body>
@@ -22,11 +21,9 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={body.className}>
-        <ThemeProvider>
-          <ReactQueryProvider>{children}</ReactQueryProvider>
-        </ThemeProvider>
+        <RootProviders>{children}</RootProviders>
       </body>
     </html>
   )

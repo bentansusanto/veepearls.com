@@ -1,5 +1,5 @@
 "use client";
-import { Register } from "@/common/Fetching/Auth/Auth";
+import { useRegisterMutation } from "@/store/services/auth.service";
 import {
   InitialRegisValue,
   validationRegisSchema,
@@ -24,13 +24,13 @@ import { Check } from "lucide-react";
 
 const FormRegister = () => {
   const [openSuccess, setOpenSuccess] = useState(false);
-  const { regisMutation, error, success } = Register();
+  const [register, { error, isSuccess }] = useRegisterMutation();
   const router = useRouter();
   const formik = useFormik({
     initialValues: InitialRegisValue,
     validationSchema: validationRegisSchema,
     onSubmit: async (values, { resetForm }) => {
-      await regisMutation.mutateAsync(values);
+      await register(values);
       resetForm();
       setOpenSuccess(true);
       setTimeout(() => {
@@ -89,7 +89,7 @@ const FormRegister = () => {
             {formik.isSubmitting ? "Loading..." : "Register"}
           </Button>
           <AlertDialogContent className="px-5">
-            {success && (
+            {isSuccess && (
               <AlertDialogHeader>
                 <span className="w-20 h-20 p-3 rounded-full mx-auto mb-5 flex justify-center animate-pulse bg-green-200">
                   <span className="w-14 h-14 p-2.5 rounded-full flex mx-auto justify-center bg-green-400 text-white">

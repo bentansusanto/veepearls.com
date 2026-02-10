@@ -1,5 +1,5 @@
 "use client";
-import { JewelType } from "@/common/Fetching/Product/fetch-jewel";
+import { useGetJewelTypesQuery } from "@/store/services/product.service";
 import { Mobile } from "@/common/media-query";
 import { menuNavigation } from "@/lib/nav-data";
 import { ChevronDown } from "lucide-react";
@@ -10,7 +10,7 @@ import React, { useState } from "react";
 const Footer = () => {
   const { isMobile } = Mobile();
   const date = new Date().getFullYear();
-  const { data: jewelData } = JewelType();
+  const { data: jewelData } = useGetJewelTypesQuery();
   const [selectMenu, setSelectMenu] = useState<number | null>(null);
   const phoneNumber = "905365829313"; // Nomor contact
   const message =
