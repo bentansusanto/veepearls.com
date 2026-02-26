@@ -1,22 +1,19 @@
 'use client'
-import { GetPemesan } from "@/common/Fetching/Pemesan/fetch-pemesan";
-import React from "react";
+// import { GetPemesan } from "@/common/Fetching/Pemesan/fetch-pemesan";
+import React from 'react'
 
 interface Props {
-  handleSelectPemesan: any;
-  selectPemesan: string;
+  handleSelectPemesan: any
+  selectPemesan: string
 }
 
-const ListDataPemesan: React.FC<Props> = ({
-  handleSelectPemesan,
-  selectPemesan,
-}) => {
-  const { data: pemesans } = GetPemesan();
+const ListDataPemesan: React.FC<Props> = ({ handleSelectPemesan, selectPemesan }) => {
+  // const { data: pemesans } = GetPemesan();
   return (
     <div className="px-3 space-y-3 h-40 overflow-y-scroll">
       <p className="font-medium text-sm">List Address</p>
       <div className="space-y-3">
-        {pemesans?.map((pemesan: any) => (
+        {/* {pemesans?.map((pemesan: any) => (
           <div
             onClick={() => handleSelectPemesan(pemesan.id)}
             key={pemesan.id}
@@ -44,11 +41,10 @@ const ListDataPemesan: React.FC<Props> = ({
               <p className="text-xs text-gray-400">{pemesan.address}</p>
             </div>
           </div>
-        ))}
+        ))} */}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ListDataPemesan;
-
+export default ListDataPemesan

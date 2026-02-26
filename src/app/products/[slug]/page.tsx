@@ -1,12 +1,17 @@
 import MainLayout from '@/components/layout/MainLayout'
-import dynamic from 'next/dynamic'
-
-const ProductDetailPage = dynamic(() => import('@/features/ProductDetails/ProductPage'))
+import ProductDetailPage from '@/features/ProductDetails/ProductPage'
 
 export const dynamicParams = false
 
 export async function generateStaticParams() {
   console.log('Generating static params for products details')
+
+  // Disable SSL certificate validation for build time
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
+  // TEMPORARY FIX: Return empty array or hardcoded values to debug build error
+  // return []
+
   const baseUrl =
     process.env.NEXT_PUBLIC_API_URL_DEV ||
     process.env.NEXT_PUBLIC_API_URL ||

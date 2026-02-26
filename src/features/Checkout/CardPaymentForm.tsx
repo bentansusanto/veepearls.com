@@ -1,5 +1,5 @@
-import { CreatePaymentCard } from "@/common/Fetching/Checkout/fetch-checkout";
 import { Button } from "@/components/ui/button";
+import { useCreatePaymentCardMutation } from "@/store/services/payment.service";
 import {
   CardElement,
   useElements,
@@ -31,7 +31,7 @@ const CardPaymentForm:React.FC<CardPaymentFormProps> = ({
   }) => {
     const stripe = useStripe();
     const elements = useElements();
-    const createPaymentCard = CreatePaymentCard();
+    const [createPaymentCard] = useCreatePaymentCardMutation();
   
     if (!stripe || !elements) {
       console.error("Stripe or Elements not initialized");
@@ -50,9 +50,7 @@ const CardPaymentForm:React.FC<CardPaymentFormProps> = ({
   
       try {
         console.log("Creating Payment Intent with pemesanId:", pemesanId);
-        const response = await createPaymentCard.mutateAsync({
-          pemesanId,
-        });
+        const response = await createPaymentCard({ pemesanId }).unwrap();
         console.log("Payment Intent Response:", response);
   
         if (!response.clientSecret) {

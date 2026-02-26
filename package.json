@@ -6,6 +6,7 @@
     "dev": "env-cmd -f .env.development next dev",
     "build": "next build",
     "start": "env-cmd -f .env next start",
+    "start:prod": "bash start-pm2.sh",
     "lint": "next lint"
   },
   "dependencies": {

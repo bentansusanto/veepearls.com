@@ -1,7 +1,6 @@
 'use client'
 import { formatDate, formatTime } from "@/common/config-date";
 import { dollar } from "@/common/Currency";
-import { FindHistoryOrder } from "@/common/Fetching/Checkout/fetch-checkout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,12 +10,13 @@ import {
   DrawerHeader,
   DrawerTitle
 } from "@/components/ui/drawer";
+import { useFindHistoryOrderQuery } from "@/store/services/payment.service";
 import { ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
 const ListOrders = () => {
-  const { data: orders } = FindHistoryOrder();
+  const { data: orders } = useFindHistoryOrderQuery();
   const [openDetail, setOpenDetail] = useState(false);
   const [selectOrder, setSelectOrder] = useState<any>({});
   const selectDetailOrder = (order: any) => {
@@ -190,5 +190,4 @@ const ListOrders = () => {
 };
 
 export default ListOrders;
-
 
