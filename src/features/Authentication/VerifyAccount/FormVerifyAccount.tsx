@@ -1,125 +1,166 @@
 "use client";
-import React from "react";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
-import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
-import {
-  initialVerifyAccountValue,
-  validationVerifyAccountSchema,
-} from "@/common/validation/AuthValidation";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useFormik } from "formik";
-import { useVerifyAccountMutation } from "@/store/services/auth.service";
+import {
+  useVerifyAccountMutation,
+  useResendVerificationMutation,
+} from "@/store/services/auth.service";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Check } from "lucide-react";
+import { Check, Mail, RefreshCcw, LogIn, AlertCircle } from "lucide-react";
+
+type ViewState = "form" | "success" | "error";
 
 const FormVerifyAccount = () => {
-  const [verifyAccount, { error, isSuccess }] = useVerifyAccountMutation();
-  const [openSuccess, setOpenSuccess] = React.useState(false);
+  const [verifyAccount, { isLoading: isVerifying }] = useVerifyAccountMutation();
+  const [resendVerification, { isLoading: isResending }] = useResendVerificationMutation();
+  const [viewState, setViewState] = useState<ViewState>("form");
+  const [hasAutoSubmitted, setHasAutoSubmitted] = useState(false);
+
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const tokenFromUrl = searchParams.get("verify_token");
+  const emailFromUrl = searchParams.get("email");
+
   const formik = useFormik({
-    initialValues: initialVerifyAccountValue,
-    validationSchema: validationVerifyAccountSchema,
-    onSubmit: async (values, { resetForm }) => {
-      await verifyAccount(values);
-      resetForm();
-      setOpenSuccess(true);
-      setTimeout(() => {
-        setOpenSuccess(false);
-        router.push("/login");
-      }, 1000);
+    initialValues: {
+      email: emailFromUrl || "",
+      token: tokenFromUrl || "",
+    },
+    enableReinitialize: true,
+    onSubmit: async (values) => {
+      try {
+        await verifyAccount({
+          email: values.email,
+          token: values.token
+        }).unwrap();
+        setViewState("success");
+      } catch (err) {
+        console.error("Verification failed:", err);
+        setViewState("error");
+      }
     },
   });
-  return (
-    <form onSubmit={formik.handleSubmit}>
-      <div className="mb-3 space-y-2">
-        <input
-          type="email"
-          {...formik.getFieldProps("email")}
-          placeholder="Email address"
-          className="bg-transparent text-xs w-full border border-gray-200
-         dark:border-gray-600 rounded-sm p-3"
-        />
-        {formik.touched.email && formik.errors.email && (
-          <p className="text-xs italic text-red-500">{formik.errors.email}</p>
-        )}
-      </div>
-      <div className="mb-3 space-y-2">
-        <InputOTP
-          name="otpCode"
-          value={formik.values.otpCode}
-          onChange={(e) => formik.setFieldValue("otpCode", e)}
-          maxLength={6}
-          pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
-        >
-          <InputOTPGroup className="mx-auto">
-            <InputOTPSlot index={0} className="p-7 text-xl uppercase" />
-            <InputOTPSlot index={1} className="p-7 text-xl uppercase" />
-            <InputOTPSlot index={2} className="p-7 text-xl uppercase" />
-            <InputOTPSlot index={3} className="p-7 text-xl uppercase" />
-            <InputOTPSlot index={4} className="p-7 text-xl uppercase" />
-            <InputOTPSlot index={5} className="p-7 text-xl uppercase" />
-          </InputOTPGroup>
-        </InputOTP>
-      </div>
-      <div className="mb-3 space-y-3">
-        <AlertDialog open={openSuccess} onOpenChange={setOpenSuccess}>
-          <Button className="w-full">
-            {formik.isSubmitting ? "Loading..." : "Verify Account"}
-          </Button>
-          <AlertDialogContent>
-            {isSuccess && (
-              <AlertDialogHeader>
-                <span className="w-20 h-20 p-3 rounded-full mx-auto mb-5 flex justify-center animate-pulse bg-green-200">
-                  <span className="w-14 h-14 p-2.5 rounded-full flex mx-auto justify-center bg-green-400 text-white">
-                    <Check width={40} height={40} strokeWidth={3} />
-                  </span>
-                </span>
-                <AlertDialogTitle>Success create account</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Please check your email to verify your account
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-            )}
-            <AlertDialogFooter>
-              {/* <AlertDialogAction>Verify Account</AlertDialogAction> */}
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-        <p className="text-sm text-gray-500 text-center">
-          I dont have an account,{" "}
-          <Link
-            prefetch={true}
-            href={"/register"}
-            className="text-[#A78E57] font-me"
-          >
-            Create account
-          </Link>
-        </p>
-        {error && (
-          <p
-            className="text-red-500 text-center text-sm bg-red-50 
-        w-full py-2 rounded-sm"
-          >
-            Error verify account, please try again
+
+  const handleResend = async () => {
+    const registeredEmail = localStorage.getItem('registered_email') || emailFromUrl || "";
+
+    if (!registeredEmail) {
+      alert("Email not found. Please try registering again.");
+      return;
+    }
+
+    try {
+      await resendVerification({ email: registeredEmail }).unwrap();
+      alert("A new verification link has been sent to your email.");
+    } catch (err: any) {
+      alert(err?.data?.message || "Failed to resend verification link");
+    }
+  };
+
+  // Auto-submit if token and email are present in URL
+  useEffect(() => {
+    if (tokenFromUrl && emailFromUrl && viewState === "form" && !hasAutoSubmitted) {
+      setHasAutoSubmitted(true);
+      formik.handleSubmit();
+    }
+  }, [tokenFromUrl, emailFromUrl, viewState, hasAutoSubmitted, formik]);
+
+  // Success View
+  if (viewState === "success") {
+    return (
+      <div className="flex flex-col items-center text-center space-y-6 py-10 animate-in fade-in zoom-in duration-500">
+        <div className="w-24 h-24 md:w-32 md:h-32 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center border border-green-500/20 shadow-2xl shadow-green-500/5">
+           <Check size={64} strokeWidth={3} className="md:scale-125" />
+        </div>
+
+        <div className="space-y-2">
+          <h1 className="text-xl font-bold text-white tracking-tight">Verify Success</h1>
+          <p className="text-gray-400 max-w-sm mx-auto text-xs">
+            Your luxury account has been successfully verified. Welcome to the exclusive world of Veepearl.
           </p>
-        )}
+        </div>
+
+        <Button
+          onClick={() => router.push("/login")}
+          className="bg-[#A78E57] hover:bg-[#8e784a] text-white px-10 py-3 text-sm rounded-full flex items-center gap-2 shadow-xl shadow-[#A78E57]/20 transition-all active:scale-95"
+        >
+          <LogIn size={20} />
+          Proceed to Login
+        </Button>
       </div>
-    </form>
+    );
+  }
+
+  // Error View
+  if (viewState === "error") {
+    return (
+      <div className="flex flex-col items-center text-center space-y-6 py-10 animate-in fade-in zoom-in duration-500">
+        <div className="w-24 h-24 md:w-32 md:h-32 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center border border-red-500/20 shadow-2xl shadow-red-500/5">
+           <AlertCircle size={64} strokeWidth={3} className="md:scale-125" />
+        </div>
+
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-white tracking-tight">Verify Error</h1>
+          <p className="text-gray-400 max-w-sm mx-auto">
+            We couldn't verify your account. The link may have expired or is no longer valid.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Button
+            onClick={handleResend}
+            disabled={isResending}
+            className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-8 py-6 rounded-full flex items-center gap-2 transition-all active:scale-95"
+          >
+            <RefreshCcw size={20} className={isResending ? "animate-spin" : ""} />
+            {isResending ? "Resending..." : "Resend Verify"}
+          </Button>
+
+          <Link href="/login">
+            <Button variant="ghost" className="text-gray-400 hover:text-white">
+              Back to Login
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // IDLE / LOADING VIEW (Before auto-submit or if no params)
+  return (
+    <div className="flex flex-col items-center text-center space-y-6 py-10 animate-in fade-in duration-700">
+      {!tokenFromUrl || !emailFromUrl ? (
+        <>
+          <div className="w-20 h-20 bg-amber-500/10 text-amber-500 p-4 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/5">
+             <AlertCircle size={48} />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-white tracking-tight">Access Denied</h1>
+            <p className="text-gray-400 max-w-sm mx-auto">
+              This page requires a valid verification link sent to your email.
+            </p>
+          </div>
+          <div className="flex flex-col gap-4">
+             <Button
+                onClick={handleResend}
+                disabled={isResending}
+                className="bg-[#A78E57] hover:bg-[#8e784a] text-white px-8 py-3 rounded-xl transition-all"
+              >
+                Resend Link
+              </Button>
+              <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors">
+                 Back to Login
+              </Link>
+          </div>
+        </>
+      ) : (
+        <>
+        </>
+      )}
+    </div>
   );
 };
 

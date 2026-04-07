@@ -2,11 +2,28 @@
 
 import { API_URL } from '@/common/Fetching/ApiConfig'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import Cookies from 'js-cookie'
+import { RootState } from '../store'
 
 export const productApi = createApi({
   reducerPath: 'productApi',
   baseQuery: fetchBaseQuery({
     baseUrl: API_URL as string,
+    credentials: 'include',
+    prepareHeaders: (headers, { getState }) => {
+      // 1. Try Redux state (preferred)
+      const token = (getState() as RootState).auth.accessToken
+      // 2. Fallback to token_mirror cookie
+      const cookieToken = Cookies.get('token_mirror')
+
+      const activeToken = token || cookieToken
+
+      if (activeToken) {
+        headers.set('authorization', `Bearer ${activeToken}`)
+      }
+      headers.set('content-type', 'application/json')
+      return headers
+    },
   }),
   tagTypes: ['Products', 'JewelTypes'],
   endpoints: builder => ({

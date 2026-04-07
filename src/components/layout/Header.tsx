@@ -22,7 +22,6 @@ import { menuLeftMobile, menuNavigation, socialMedia } from '@/lib/nav-data'
 import { useGetUserQuery, useLogoutMutation } from '@/store/services/auth.service'
 import { useGetCartQuery } from '@/store/services/cart.service'
 import { useGetJewelTypesQuery } from '@/store/services/product.service'
-import Cookies from 'js-cookie'
 import {
   ChevronDown,
   ChevronLeft,
@@ -38,10 +37,12 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { Button } from '../ui/button'
 import { ThemeToggle } from '../ui/theme-toggle'
 import MenuAccount from './header-mobile-component/account/MenuAccount'
 import ListSearch from './header-mobile-component/search/ListSearch'
+import { logout } from '@/store/slices/authSlice'
 
 const Header = () => {
   const { isMobile } = Mobile()
@@ -50,6 +51,7 @@ const Header = () => {
   const { data: jewelData } = useGetJewelTypesQuery()
   const { data: cartData } = useGetCartQuery()
   const [logoutMutation] = useLogoutMutation()
+  const dispatch = useDispatch()
   const [openMenu, setOpenMenu] = useState<boolean>(false)
   const [selectMenu, setSelectMenu] = useState<number | null>(0)
   const handleSelectMenu = (index: number) => {
@@ -64,7 +66,8 @@ const Header = () => {
       .unwrap()
       .catch(() => {})
       .finally(() => {
-        Cookies.remove('session_veepearl')
+        // Bersihkan Redux state dan cookie token_mirror
+        dispatch(logout())
         window.location.href = '/login'
       })
   }
@@ -219,33 +222,42 @@ const Header = () => {
               </div>
               <div className="bg-gray-200 dark:bg-gray-600 h-[1px] w-full my-5" />
               <div className="absolute inset-x-0 bottom-0 p-5 bg-gray-100 dark:bg-gray-700">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col space-y-5">
                   {userData ? (
-                    <span
-                      onClick={handleLogout}
-                      className="flex cursor-pointer items-center space-x-5 text-sm text-red-500"
-                    >
-                      <LogOut width={16} height={16} strokeWidth={1.75} className="me-2" />
-                      Logout
-                    </span>
+                    <div className="space-y-5">
+                      <span
+                        onClick={handleLogout}
+                        className="flex cursor-pointer items-center space-x-3 text-sm text-red-500"
+                      >
+                        <LogOut width={16} height={16} strokeWidth={1.75} />
+                        <p>Logout</p>
+                      </span>
+                    </div>
                   ) : (
-                    <Link prefetch={true} href={'/login'} className="flex items-center space-x-3">
+                    <Link
+                      prefetch={true}
+                      href={'/login'}
+                      onClick={() => setOpenMenu(false)}
+                      className="flex items-center space-x-3"
+                    >
                       <User width={20} height={20} strokeWidth={1.5} />
                       <p className="text-sm">Login</p>
                     </Link>
                   )}
-                  <div className="flex items-center space-x-3">
-                    {socialMedia.map((item, index) => (
-                      <div key={index}>
-                        <Link prefetch={true} href={item.link}>
-                          {item.title === 'Facebook' ? (
-                            <Facebook width={22} height={22} strokeWidth={1.5} />
-                          ) : (
-                            <Instagram width={22} height={22} strokeWidth={1.5} />
-                          )}
-                        </Link>
-                      </div>
-                    ))}
+                  <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-600 pt-5 mt-2">
+                    <div className="flex items-center space-x-3">
+                      {socialMedia.map((item, index) => (
+                        <div key={index}>
+                          <Link prefetch={true} href={item.link}>
+                            {item.title === 'Facebook' ? (
+                              <Facebook width={22} height={22} strokeWidth={1.5} />
+                            ) : (
+                              <Instagram width={22} height={22} strokeWidth={1.5} />
+                            )}
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

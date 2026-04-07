@@ -8,7 +8,7 @@ export const pearlTypes = [
         image: 'type-necklare.webp'
     },
     {
-        name: 'Earring',
+        name: 'Earings',
         image: 'type-earings.webp'
     },
     {

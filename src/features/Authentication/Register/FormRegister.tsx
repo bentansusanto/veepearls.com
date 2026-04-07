@@ -1,92 +1,63 @@
-"use client";
-import { useRegisterMutation } from "@/store/services/auth.service";
-import {
-  InitialRegisValue,
-  validationRegisSchema,
-} from "@/common/validation/AuthValidation";
-import { Button } from "@/components/ui/button";
-import { useFormik } from "formik";
-import Link from "next/link";
-import React, { useState } from "react";
+'use client'
+
 import {
   AlertDialog,
-  // AlertDialogAction,
-  // AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  // AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useRouter } from "next/navigation";
-import { Check } from "lucide-react";
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Check } from 'lucide-react'
+import Link from 'next/link'
+import { useRegisterForm } from './hooks'
 
 const FormRegister = () => {
-  const [openSuccess, setOpenSuccess] = useState(false);
-  const [register, { error, isSuccess }] = useRegisterMutation();
-  const router = useRouter();
-  const formik = useFormik({
-    initialValues: InitialRegisValue,
-    validationSchema: validationRegisSchema,
-    onSubmit: async (values, { resetForm }) => {
-      await register(values);
-      resetForm();
-      setOpenSuccess(true);
-      setTimeout(() => {
-        setOpenSuccess(false);
-        router.push("/verify-account");
-      }, 2000);
-    },
-  });
+  const { formik, openSuccess, setOpenSuccess, error, isSuccess } = useRegisterForm()
+
   return (
     <form onSubmit={formik.handleSubmit}>
       <div className="mb-3 space-y-2">
         <input
           type="text"
-          {...formik.getFieldProps("name")}
+          {...formik.getFieldProps('name')}
           placeholder="Full name"
           className="bg-transparent text-xs w-full border border-gray-200
          dark:border-gray-600 rounded-sm p-3"
         />
         {formik.touched.name && formik.errors.name && (
-          <div className=" text-red-400 italic text-xs">
-            {formik.errors.name}
-          </div>
+          <div className=" text-red-500 italic text-xs">{formik.errors.name}</div>
         )}
       </div>
       <div className="mb-3 space-y-2">
         <input
           type="email"
-          {...formik.getFieldProps("email")}
+          {...formik.getFieldProps('email')}
           placeholder="Email address"
           className="bg-transparent text-xs w-full border border-gray-200
          dark:border-gray-600 rounded-sm p-3"
         />
         {formik.touched.email && formik.errors.email && (
-          <div className=" text-red-400 italic text-xs">
-            {formik.errors.email}
-          </div>
+          <div className=" text-red-500 italic text-xs">{formik.errors.email}</div>
         )}
       </div>
       <div className="mb-3 space-y-2">
         <input
           type="password"
-          {...formik.getFieldProps("password")}
+          {...formik.getFieldProps('password')}
           placeholder="Password"
           className="bg-transparent text-xs w-full border border-gray-200
          dark:border-gray-600 rounded-sm p-3"
         />
         {formik.touched.password && formik.errors.password && (
-          <div className=" text-red-400 italic text-xs">
-            {formik.errors.password}
-          </div>
+          <div className=" text-red-500 italic text-xs">{formik.errors.password}</div>
         )}
       </div>
       <div className="mb-3 space-y-3">
         <AlertDialog open={openSuccess} onOpenChange={setOpenSuccess}>
-          <Button className="w-full">
-            {formik.isSubmitting ? "Loading..." : "Register"}
+          <Button className="w-full" type="submit">
+            {formik.isSubmitting ? 'Loading...' : 'Register'}
           </Button>
           <AlertDialogContent className="px-5">
             {isSuccess && (
@@ -109,18 +80,14 @@ const FormRegister = () => {
         </AlertDialog>
 
         <p className="text-sm text-gray-500 text-center">
-          I already have an account,{" "}
-          <Link
-            prefetch={true}
-            href={"/login"}
-            className="text-[#A78E57] font-me"
-          >
+          I already have an account,{' '}
+          <Link prefetch={true} href={'/login'} className="text-[#A78E57] font-me">
             Login
           </Link>
         </p>
         {error && (
           <p
-            className="text-red-500 text-center text-sm bg-red-50 
+            className="text-red-500 text-center text-sm bg-red-50
         w-full py-2 rounded-sm"
           >
             Error create account
@@ -128,7 +95,7 @@ const FormRegister = () => {
         )}
       </div>
     </form>
-  );
-};
+  )
+}
 
-export default FormRegister;
+export default FormRegister

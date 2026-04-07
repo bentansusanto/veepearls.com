@@ -2,7 +2,7 @@
 import { useGetJewelTypesQuery } from "@/store/services/product.service";
 import { Mobile } from "@/common/media-query";
 import { menuNavigation } from "@/lib/nav-data";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, MessageCircleMore } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -84,20 +84,20 @@ const Footer = () => {
               <div className="bg-gray-200 dark:bg-gray-600 h-[1px] w-full" />
             </div>
           ))}
-          <Link href={url} target="_blank" className="fixed bottom-28 right-3">
-            <Image
-              src={"/images/icon-whatsapp.svg"}
-              width={0}
-              height={0}
-              alt="icon-whatsapp"
-              className="w-14"
-            />
+          <Link
+            href={url}
+            target="_blank"
+            className="fixed bottom-28 right-3 flex items-center justify-center w-14 h-14 rounded-full bg-black dark:bg-white text-white dark:text-black z-50 shadow-lg"
+          >
+            <MessageCircleMore size={32} />
           </Link>
           <footer className="text-sm text-gray-400 text-center mt-10 pb-5">
             © {date} Veepearl. All Rights Reserved.
           </footer>
         </div>
       ) : (
+
+
         // DESKTOP DEVICE & TABLET DEVICE
         <></>
       )}

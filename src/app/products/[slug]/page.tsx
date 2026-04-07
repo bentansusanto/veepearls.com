@@ -14,8 +14,7 @@ export async function generateStaticParams() {
 
   const baseUrl =
     process.env.NEXT_PUBLIC_API_URL_DEV ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    'http://localhost:8081/api/v1'
+    process.env.NEXT_PUBLIC_API_URL
   try {
     const res = await fetch(`${baseUrl}/products`)
     if (!res.ok) throw new Error(`Fetch failed: ${res.status}`)

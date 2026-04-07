@@ -1,7 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    trailingSlash: true,
+    trailingSlash: false,
     output: "standalone",
+    devIndicators: {
+      buildActivity: false,
+      appIsrStatus: false,
+      staticIndication: false,
+    },
     images: {
       unoptimized: true,
       remotePatterns: [

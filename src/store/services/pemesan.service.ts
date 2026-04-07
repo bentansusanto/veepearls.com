@@ -5,8 +5,8 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import Cookies from 'js-cookie'
 import { RootState } from '../store'
 
-export const cartApi = createApi({
-  reducerPath: 'cartApi',
+export const pemesanApi = createApi({
+  reducerPath: 'pemesanApi',
   baseQuery: fetchBaseQuery({
     baseUrl: API_URL as string,
     credentials: 'include',
@@ -25,53 +25,63 @@ export const cartApi = createApi({
       return headers
     },
   }),
-  tagTypes: ['Cart'],
+  tagTypes: ['Pemesan'],
   endpoints: builder => ({
-    getCart: builder.query<any[], void>({
-      query: () => '/find_cart',
+    getPemesan: builder.query<any[], void>({
+      query: () => '/find_all_pemesan',
       transformResponse: (res: any) => res?.data ?? res,
       providesTags: result =>
         result
           ? [
-              ...result.map((item: any) => ({ type: 'Cart' as const, id: item.id })),
-              { type: 'Cart', id: 'LIST' },
+              ...result.map((item: any) => ({ type: 'Pemesan' as const, id: item.id })),
+              { type: 'Pemesan', id: 'LIST' },
             ]
-          : [{ type: 'Cart', id: 'LIST' }],
+          : [{ type: 'Pemesan', id: 'LIST' }],
     }),
-    addCart: builder.mutation<any, { productId: string; quantity: number }>({
+    getPemesanById: builder.query<any, string>({
+      query: id => `/find_pemesan/${id}`,
+      transformResponse: (res: any) => res?.data ?? res,
+      providesTags: (result, error, id) => [{ type: 'Pemesan', id }],
+    }),
+    createPemesan: builder.mutation<any, any>({
       query: body => ({
-        url: '/add_cart',
+        url: '/create_pemesan',
         method: 'POST',
         body,
       }),
       transformResponse: (res: any) => res?.data ?? res,
-      invalidatesTags: [{ type: 'Cart', id: 'LIST' }],
+      invalidatesTags: [{ type: 'Pemesan', id: 'LIST' }],
     }),
-    updateCart: builder.mutation<any, { cartId: string; quantity: number }>({
-      query: ({ cartId, quantity }) => ({
-        url: `/update_product_cart/${cartId}`,
+    updatePemesan: builder.mutation<any, { pemesanId: string; data: any }>({
+      query: ({ pemesanId, data }) => ({
+        url: `/update_pemesan/${pemesanId}`,
         method: 'PUT',
-        body: { quantity },
+        body: data,
       }),
       transformResponse: (res: any) => res?.data ?? res,
       invalidatesTags: (result, error, arg) => [
-        { type: 'Cart', id: arg.cartId },
-        { type: 'Cart', id: 'LIST' },
+        { type: 'Pemesan', id: arg.pemesanId },
+        { type: 'Pemesan', id: 'LIST' },
       ],
     }),
-    removeCart: builder.mutation<any, string>({
-      query: cartId => ({
-        url: `/remove_product_cart/${cartId}`,
+    deletePemesan: builder.mutation<any, string>({
+      query: pemesanId => ({
+        url: `/delete_pemesan/${pemesanId}`,
         method: 'DELETE',
       }),
       transformResponse: (res: any) => res?.data ?? res,
       invalidatesTags: (result, error, arg) => [
-        { type: 'Cart', id: arg },
-        { type: 'Cart', id: 'LIST' },
+        { type: 'Pemesan', id: arg },
+        { type: 'Pemesan', id: 'LIST' },
       ],
     }),
   }),
 })
 
-export const { useGetCartQuery, useAddCartMutation, useUpdateCartMutation, useRemoveCartMutation } =
-  cartApi
+export const {
+  useGetPemesanQuery,
+  useGetPemesanByIdQuery,
+  useCreatePemesanMutation,
+  useUpdatePemesanMutation,
+  useDeletePemesanMutation,
+} = pemesanApi

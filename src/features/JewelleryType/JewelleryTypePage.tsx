@@ -17,9 +17,17 @@ const JewelleryTypePage = () => {
         className={`${heading.className} text-lg font-semibold
         capitalize md:hidden px-5 block`}
       >
-        {typeData?.name_type}
+        {typeData?.name_type || `Category: ${type}`}
       </h1>
-      <ListProductJewelType products={listProduct} />
+      {listProduct.length === 0 ? (
+        <div className="px-5 py-20 text-center text-gray-500">
+          No products found in category "{type}"
+          <br/>
+          (DEBUG: products count = {products?.length || 0})
+        </div>
+      ) : (
+        <ListProductJewelType products={listProduct} />
+      )}
     </div>
   )
 }

@@ -3,16 +3,23 @@
 import { API_URL } from '@/common/Fetching/ApiConfig'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import Cookies from 'js-cookie'
+import { RootState } from '../store'
 
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: fetchBaseQuery({
     baseUrl: API_URL as string,
     credentials: 'include',
-    prepareHeaders: headers => {
-      const token = Cookies.get('session_veepearl')
-      if (token) {
-        headers.set('authorization', `Bearer ${token}`)
+    prepareHeaders: (headers, { getState }) => {
+      // 1. Try Redux state (preferred)
+      const token = (getState() as RootState).auth.accessToken
+      // 2. Fallback to token_mirror cookie
+      const cookieToken = Cookies.get('token_mirror')
+
+      const activeToken = token || cookieToken
+
+      if (activeToken) {
+        headers.set('authorization', `Bearer ${activeToken}`)
       }
       headers.set('content-type', 'application/json')
       return headers
@@ -33,7 +40,7 @@ export const authApi = createApi({
         method: 'POST',
         body,
       }),
-      transformResponse: (response: any) => response?.message ?? response,
+      transformResponse: (response: any) => response?.data,
     }),
     verifyAccount: builder.mutation<any, any>({
       query: body => ({
@@ -43,40 +50,40 @@ export const authApi = createApi({
       }),
       transformResponse: (response: any) => response?.message ?? response,
     }),
-    verifyOtp: builder.mutation<any, any>({
+    forgotPassword: builder.mutation<any, { email: string }>({
       query: body => ({
-        url: '/auth/verify_otp',
+        url: '/auth/forgot_password',
         method: 'POST',
         body,
       }),
-      async onQueryStarted(_, { queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled
-          const token = data
-          if (token) {
-            const expires = new Date()
-            expires.setHours(expires.getHours() + 1)
-            Cookies.set('session_veepearl', token, {
-              path: '/',
-              secure: true,
-              sameSite: 'none',
-              expires,
-            })
-          }
-        } catch {}
-      },
-      transformResponse: (response: any) => response?.data ?? response,
+      transformResponse: (response: any) => response?.message ?? response,
+    }),
+    resetPassword: builder.mutation<any, any>({
+      query: body => ({
+        url: '/auth/reset_password',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (response: any) => response?.message ?? response,
+    }),
+    resendVerification: builder.mutation<any, { email: string }>({
+      query: body => ({
+        url: '/auth/resend_verification',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (response: any) => response?.message ?? response,
     }),
     refreshToken: builder.mutation<any, void>({
       query: () => ({
         url: '/auth/refresh_token',
         method: 'POST',
       }),
-      transformResponse: (response: any) => response?.data ?? response,
+      transformResponse: (response: any) => response?.data,
     }),
     getUser: builder.query<any, void>({
       query: () => ({
-        url: '/auth/getUser',
+        url: '/auth/profile',
         method: 'GET',
       }),
       transformResponse: (response: any) => response?.data ?? response,
@@ -96,7 +103,9 @@ export const {
   useRegisterMutation,
   useLoginMutation,
   useVerifyAccountMutation,
-  useVerifyOtpMutation,
+  useResendVerificationMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
   useRefreshTokenMutation,
   useGetUserQuery,
   useLogoutMutation,

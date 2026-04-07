@@ -20,21 +20,43 @@ import {
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 
+import { useDispatch } from "react-redux";
+import { setCredentials } from "@/store/slices/authSlice";
+
 const FormLogin = () => {
   const [login, { error, isSuccess }] = useLoginMutation();
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const router = useRouter();
+  const dispatch = useDispatch();
+
   const formik = useFormik({
     initialValues: InitialLoginValue,
     validationSchema: validationLoginSchema,
     onSubmit: async (values, { resetForm }) => {
-      await login(values);
-      resetForm();
-      setOpenSuccess(true);
-      setTimeout(() => {
-        setOpenSuccess(false);
-        router.push("/verify-otp");
-      }, 2000);
+      try {
+        const result = await login(values).unwrap();
+        if (result && result.access_token) {
+          dispatch(
+            setCredentials({
+              user: {
+                id: result.id,
+                name: result.name,
+                email: result.email,
+                role: result.role,
+              },
+              access_token: result.access_token,
+            })
+          );
+        }
+        resetForm();
+        setOpenSuccess(true);
+        setTimeout(() => {
+          setOpenSuccess(false);
+          router.push("/");
+        }, 2000);
+      } catch (err: any) {
+        console.error("Login failed:", err);
+      }
     },
   });
   return (
@@ -68,7 +90,7 @@ const FormLogin = () => {
       <div className="mb-3 space-y-2">
         <Link
           prefetch={true}
-          href={"/login"}
+          href={"/forgot-password"}
           className="text-xs text-[#A78E57]"
         >
           Forgot Password
@@ -87,9 +109,9 @@ const FormLogin = () => {
                     <Check width={40} height={40} strokeWidth={3} />
                   </span>
                 </span>
-                <AlertDialogTitle>Success login</AlertDialogTitle>
+                <AlertDialogTitle>Login Successful</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Please check your email to verify otp
+                  Welcome back to Veepearl!
                 </AlertDialogDescription>
               </AlertDialogHeader>
             )}
@@ -99,7 +121,7 @@ const FormLogin = () => {
           </AlertDialogContent>
         </AlertDialog>
         <p className="text-sm text-gray-500 text-center">
-          I dont have an account,{" "}
+          I don't have an account,{" "}
           <Link
             prefetch={true}
             href={"/register"}
