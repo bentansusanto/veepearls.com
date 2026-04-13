@@ -31,7 +31,7 @@ const authSlice = createSlice({
       state.accessToken = access_token
 
       // Mirror token for Middleware visibility in cross-site development
-      Cookies.set('token_mirror', access_token, {
+      Cookies.set('session_token', access_token, {
         expires: 7,
         sameSite: 'lax',
         secure: false, // development compatible
@@ -40,7 +40,7 @@ const authSlice = createSlice({
     logout: state => {
       state.user = null
       state.accessToken = null
-      Cookies.remove('token_mirror')
+      Cookies.remove('session_token')
     },
   },
 })

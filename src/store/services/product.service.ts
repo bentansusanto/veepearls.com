@@ -14,7 +14,7 @@ export const productApi = createApi({
       // 1. Try Redux state (preferred)
       const token = (getState() as RootState).auth.accessToken
       // 2. Fallback to token_mirror cookie
-      const cookieToken = Cookies.get('token_mirror')
+      const cookieToken = Cookies.get('session_token')
 
       const activeToken = token || cookieToken
 
