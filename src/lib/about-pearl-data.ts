@@ -3,8 +3,23 @@ import { FounderPage, OurBrandDNA, OurKeyConsiderate, OurMarketCustomers } from 
 export const foundePage: FounderPage = {
     heading: "Our Founder &  CEO",
     content: {
-        heading: "Verawati Basri, Founder and CEO",
-        body: "Starting from her love and collection of pearls, 7 years ago Vera started her hobby of making jewelry with her own designs, after several years of pursuing her hobby which was initially only to balance the business she had been involved in for more than 15 years where many men were involved, Vera also started to create her own brand and started to enter the retail market especially in Turkey, because in the last 5 years Vera has started to expand her business outside her native country of Indonesia."
+        heading: "Behind the Founder Story of VeePearls",
+        body: `VeePearls began with a personal fascination with pearls — their natural beauty, individuality, and the fact that no two are ever exactly the same.
+
+For Verawatl Basri, pearls were never simply jewellery. They carried a sense of character, elegance, and a connection to the sea that felt deeply personal. Coming from Indonesia, an archipelago shaped by the ocean, she saw pearls as a beautiful reflection of the country’s natural richness and maritime heritage.
+
+What started as a private passion gradually grew into a creative journey. Vera began exploring different pearl forms, designing pieces for herself, and discovering how each pearl could be transformed into jewellery without losing its natural identity.
+
+Around nine years ago, this fascination became a creative practice, initially offering a personal balance to the business world Vera had worked in for more than fifteen years.
+Over time, that passion evolved into VeePearls.
+
+The brand was created with the intention of presenting pearls in a way that feels modern, expressive, and distinctive while still respecting their natural character. Rather than seeking perfect uniformity, VeePearls celebrates individuality, organic form, craftsmanship, and timeless elegance.
+
+Today, VeePearls represents more than jewellery. It is Vera’s way of bringing a piece of Indonesia’s natural beauty into a wider international story connecting heritage, creativity, and contemporary design through pearls.
+
+“For me, every pearl already has its own story. VeePearls is about allowing that individuality to be seen, appreciated, and carried into the world.”
+
+— Verawatl Basri, Founder of VeePearls`
     },
     image: "bg-founder-page2.jpg"
 }

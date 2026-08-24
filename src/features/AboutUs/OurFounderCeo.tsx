@@ -30,7 +30,7 @@ const OurFounderAndCeo = () => {
                 >
                   {foundePage.content.heading}
                 </h2>
-                <p className="text-gray-400 text-sm">
+                <p className="text-gray-400 text-sm whitespace-pre-line">
                   {foundePage.content.body}
                 </p>
               </div>
